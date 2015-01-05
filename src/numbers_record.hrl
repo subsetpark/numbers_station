@@ -1,0 +1,4 @@
+-record(series, {
+   id,
+   name
+}).

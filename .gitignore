@@ -1,0 +1,8 @@
+*.beam
+*.swp
+.rebar
+ebin
+priv
+deps
+Mnesia*
+rebar

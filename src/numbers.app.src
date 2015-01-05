@@ -1,0 +1,12 @@
+{application, numbers,
+    [
+    {description, "An integer series server"},
+    {vsn, "1"}, %% version
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+        ]},
+    {mod, { numbers_app, []}},
+    {env, []}
+]}.
