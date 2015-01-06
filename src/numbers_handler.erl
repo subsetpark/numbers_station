@@ -16,6 +16,10 @@ cross_domains(_Route, _Req, State) ->
 init(_Route, _Req, State) ->
     {ok, State}.
 
+
+terminate(_Reason, _Route, _Req, _State) ->
+    ok.
+
 get("/series", _Req, State) ->
     Query = fun() ->
             qlc:e(
@@ -30,28 +34,17 @@ get("/series/:id/:n", Req, State) ->
     Id = binary_to_atom(leptus_req:param(Req, id), unicode),
     N = binary_to_integer(leptus_req:param(Req, n)),
 
-    Series = get_series(Id),
-
-    Result = Series(N),
+    Result = get_term(Id, N),
 
     io:format('~p', [Result]),
     Json = numbers_helper:format([Result]),
 
     {200, {json, Json}, State}.
 
-natural(N) ->
-    N.
+-spec get_term(atom(), integer()) -> integer().
+get_term(Series, N) when (N > 0) -> 
+    case Series of 
+        natural -> numbers_series:natural(N);
+        fibonacci -> numbers_series:fibonacci(N)
+    end.
 
-fibonacci(1) -> 1;
-fibonacci(2) -> 1;
-fibonacci(N) when N > 2 -> fib(N, 1, 1).
-
-fib(3, P1, P2) -> P1 + P2;
-fib(N, P1, P2) ->
-    fib(N-1, P2, P1 + P2).
-
-get_series(natural) -> fun natural/1;
-get_series(fibonacci) -> fun fibonacci/1.
-
-terminate(_Reason, _Route, _Req, _State) ->
-    ok.

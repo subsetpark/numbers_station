@@ -6,3 +6,4 @@ priv
 deps
 Mnesia*
 rebar
+.rebar/erlcinfo
