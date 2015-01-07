@@ -26,10 +26,10 @@ get("/series", _Req, State) ->
     {200, {json, Json}, State};
 
 get("/series/:id/:n", Req, State) ->
-    Id = leptus_req:param(Req, id),
+    Id = binary_to_atom(leptus_req:param(Req, id), unicode),
     N = binary_to_integer(leptus_req:param(Req, n)),
 
-    {Status, Response} = get_term(Id, N),
+    {Status, Response} = numbers_series:get_term(Id, N),
 
     Json = numbers_helper:format([Response]),
     
@@ -40,15 +40,3 @@ get("/series/:id/:n", Req, State) ->
     end,
 
     {Code, {json, Json}, State}.
-
--spec get_term(binary(), integer()) -> {atom(), integer()}.
-get_term(Series, N) when (N > 0) -> 
-    case Series of 
-        <<"natural">> ->    {ok, numbers_series:natural(N)};
-        <<"fibonacci">> ->  {ok, numbers_series:fibonacci(N)};
-        <<"pyramid">> ->    {ok, numbers_series:pyramid(N)};
-        <<"taxicab">> ->    {ok, numbers_series:taxicab(N)};
-        <<"abundant">> ->   {ok, numbers_series:abundant(N)};
-        _ ->                {not_found, <<"Series not found.">>}
-    end;
-get_term(_, _) ->       {error, <<"Bad term.">>}.
