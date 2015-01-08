@@ -36,10 +36,14 @@ abundant(N) ->
 is_abundant(K) ->
     lists:sum([D || D <- lists:seq(1, K div 2), K rem D == 0]) > K.
 
-padovan(1) -> 1;
-padovan(2) -> 1;
-padovan(3) -> 1;
-padovan(N) -> padovan(N-2) + padovan(N-3).
+padovan(N) when N < 4 -> 1;
+padovan(N) -> padovan(N, 4, [1, 1, 1]).
+padovan(N, K, [A1,A2,A3|T]) ->
+    A = A2 + A3,
+    case K of
+        N -> A;
+        _ -> padovan(N, K + 1, [A,A1,A2,A3|T])
+    end.
 
 % Series Constructors
 nth_term(N, Test) ->
