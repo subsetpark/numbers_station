@@ -1,6 +1,6 @@
 {application, numbers,
     [
-    {description, "An integer series server"},
+    {description, "An integer sequence server"},
     {vsn, "1"}, %% version
     {registered, []},
     {applications, [

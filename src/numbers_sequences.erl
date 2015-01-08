@@ -1,8 +1,8 @@
--module(numbers_series).
--export([get_series_names/0, get_term/2]).
+-module(numbers_sequences).
+-export([get_sequence_names/0, get_term/2]).
 
-get_series_names() ->
-    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>].
+get_sequence_names() ->
+    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>].
 
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
 get_term(natural, N) -> {ok, natural(N)};
@@ -10,10 +10,11 @@ get_term(fibonacci, N) -> {ok, fibonacci(N)};
 get_term(pyramid, N) -> {ok, pyramid(N)};
 get_term(taxicab, N) -> {ok, taxicab(N)};
 get_term(abundant, N) -> {ok, abundant(N)};
+get_term(padovan, N) -> {ok, padovan(N)};
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 % Numbers Series
-% The series of natural numbers - the identity series
+% The sequence of natural numbers - the identity sequence
 natural(N) -> N.
 
 fibonacci(1) -> 1;
@@ -34,6 +35,11 @@ abundant(N) ->
     nth_term(N, fun is_abundant/1).
 is_abundant(K) ->
     lists:sum([D || D <- lists:seq(1, K div 2), K rem D == 0]) > K.
+
+padovan(1) -> 1;
+padovan(2) -> 1;
+padovan(3) -> 1;
+padovan(N) -> padovan(N-2) + padovan(N-3).
 
 % Series Constructors
 nth_term(N, Test) ->

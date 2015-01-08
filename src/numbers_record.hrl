@@ -1,5 +1,0 @@
--record(series, {
-   id,
-   name
-}).
-
