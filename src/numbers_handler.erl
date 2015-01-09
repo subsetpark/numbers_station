@@ -39,3 +39,19 @@ get("/sequence/:id/:n", Req, State) ->
     end,
 
     {Code, {json, Json}, State}.
+
+get("/sequence/:id/first/:n", Req, State) ->
+    Id = binary_to_atom(leptus_req:param(Req, id), unicode),
+    N = binary_to_integer(leptus_req:param(Req, n)),
+
+    {Status, Response} = numbers_sequences:get_term(Id, N),
+
+    Json = numbers_helper:format([Response]),
+    
+    Code = case Status of
+        ok -> 200;
+        not_found -> 404;
+        error -> 400
+    end,
+
+    {Code, {json, Json}, State}.

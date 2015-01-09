@@ -1,5 +1,5 @@
 -module(numbers_sequences).
--export([get_sequence_names/0, get_term/2]).
+-export([get_sequence_names/0, get_term/2, n_terms/2]).
 
 get_sequence_names() ->
     [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>].
@@ -13,6 +13,7 @@ get_term(abundant, N) -> {ok, abundant(N)};
 get_term(padovan, N) -> {ok, padovan(N)};
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
+n_terms(Sequence, N) -> lists:map(fun({ok, A}) -> A end, [get_term(Sequence, Y) || Y <- lists:seq(1, N) ]).
 % Numbers Series
 % The sequence of natural numbers - the identity sequence
 natural(N) -> N.
