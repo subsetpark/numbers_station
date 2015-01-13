@@ -5,15 +5,21 @@ get_sequence_names() ->
     [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>].
 
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
-get_term(natural, N) -> {ok, natural(N)};
-get_term(fibonacci, N) -> {ok, fibonacci(N)};
-get_term(pyramid, N) -> {ok, pyramid(N)};
-get_term(taxicab, N) -> {ok, taxicab(N)};
-get_term(abundant, N) -> {ok, abundant(N)};
-get_term(padovan, N) -> {ok, padovan(N)};
+get_term(natural, N) -> term(fun natural/1, N);
+get_term(fibonacci, N) -> term(fun fibonacci/1, N);
+get_term(pyramid, N) -> term(fun pyramid/1, N);
+get_term(taxicab, N) -> term(fun taxicab/1, N);
+get_term(abundant, N) -> term(fun abundant/1, N);
+get_term(padovan, N) -> term(fun padovan/1, N);
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
-n_terms(Sequence, N) -> [fun({ok, A}) -> A end(get_term(Sequence, Y)) || Y <- lists:seq(1, N) ].
+term(Fun, N) ->
+    if 
+        is_integer(A = Fun(N)) -> {ok, A};
+        true -> {error, A}
+    end.
+
+n_terms(Sequence, N) -> [fun({ok, A}) -> A end (get_term(Sequence, Y)) || Y <- lists:seq(1, N) ].
 
 % --------------
 % Numbers Series
@@ -38,7 +44,8 @@ padovan(N, A1, A2, A3) -> padovan(N-1, A2, A3, A1+A2).
 pyramid(N) -> (N * (N+1) * (N + 2)) div 6.
 
 taxicab(N) when N < length(?Taxicab) ->
-    lists:nth(N, ?Taxicab).
+    lists:nth(N, ?Taxicab);
+taxicab(_) -> {error, <<"Term not known.">>}.
 
 % A number is abundant if it is less than the sum of its divisors.
 abundant(N) ->
