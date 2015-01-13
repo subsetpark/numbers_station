@@ -38,7 +38,7 @@ get("/sequence/:id/:n", Req, State) ->
         error -> 400
     end,
 
-    {Code, {json, Json}, State}.
+    {Code, {json, Json}, State};
 
 get("/sequence/:id/first/:n", Req, State) ->
     Id = binary_to_atom(leptus_req:param(Req, id), unicode),
