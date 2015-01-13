@@ -14,12 +14,13 @@ get_term(padovan, N) -> term(fun padovan/1, N);
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(Fun, N) ->
-    if 
-        is_integer(A = Fun(N)) -> {ok, A};
+    A = Fun(N),
+    if
+        is_integer(A) -> {ok, A};
         true -> {error, A}
     end.
 
-n_terms(Sequence, N) -> [fun({ok, A}) -> A end (get_term(Sequence, Y)) || Y <- lists:seq(1, N) ].
+n_terms(Sequence, N) ->  [A  || Y <- lists:seq(1, N), {ok, A} <- get_term(Sequence, Y)].
 
 % --------------
 % Numbers Series
@@ -45,7 +46,7 @@ pyramid(N) -> (N * (N+1) * (N + 2)) div 6.
 
 taxicab(N) when N < length(?Taxicab) ->
     lists:nth(N, ?Taxicab);
-taxicab(_) -> {error, <<"Term not known.">>}.
+taxicab(_) -> <<"Term not known.">>.
 
 % A number is abundant if it is less than the sum of its divisors.
 abundant(N) ->
