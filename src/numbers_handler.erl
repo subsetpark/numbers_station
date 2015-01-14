@@ -44,7 +44,7 @@ get("/sequence/:id/first/:n", Req, State) ->
     Id = binary_to_atom(leptus_req:param(Req, id), unicode),
     N = binary_to_integer(leptus_req:param(Req, n)),
 
-    {Status, Response} = numbers_sequences:get_term(Id, N),
+    {Status, Response} = numbers_sequences:n_terms(Id, N),
 
     Json = numbers_helper:format([Response]),
     

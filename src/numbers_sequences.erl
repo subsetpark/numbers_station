@@ -1,9 +1,11 @@
 -module(numbers_sequences).
 -export([get_sequence_names/0, get_term/2, n_terms/2]).
 
+-spec get_sequence_names() -> list(binary()).
 get_sequence_names() ->
     [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>].
 
+-spec get_term(atom(), integer()) -> {atom(), integer()}.
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
 get_term(natural, N) -> term(fun natural/1, N);
 get_term(fibonacci, N) -> term(fun fibonacci/1, N);
@@ -17,10 +19,15 @@ term(Fun, N) ->
     A = Fun(N),
     if
         is_integer(A) -> {ok, A};
-        true -> {error, A}
+        not is_integer(A) -> {error, A}
     end.
 
-n_terms(Sequence, N) ->  [A  || Y <- lists:seq(1, N), {ok, A} <- get_term(Sequence, Y)].
+-spec n_terms(atom(), non_neg_integer()) -> {ok, list(integer())}.
+n_terms(Sequence, N) -> n_terms(Sequence, N, []).
+n_terms(_, 0, L) -> {ok, L};
+n_terms(Sequence, N, L) ->
+    {ok, A} = get_term(Sequence, N),
+    n_terms(Sequence, N-1, [A|L]).
 
 % --------------
 % Numbers Series
@@ -44,7 +51,7 @@ padovan(N, A1, A2, A3) -> padovan(N-1, A2, A3, A1+A2).
 
 pyramid(N) -> (N * (N+1) * (N + 2)) div 6.
 
-taxicab(N) when N < length(?Taxicab) ->
+taxicab(N) when N =< length(?Taxicab) ->
     lists:nth(N, ?Taxicab);
 taxicab(_) -> <<"Term not known.">>.
 
@@ -54,8 +61,9 @@ abundant(N) ->
 is_abundant(K) ->
     lists:sum([D || D <- lists:seq(1, K div 2), K rem D == 0]) > K.
 
-
+% -------------------
 % Series Constructors
+
 nth_term(N, Test) ->
     nth_term(N, 0, 1, Test).
 nth_term(N, Count, Candidate, Test) ->
