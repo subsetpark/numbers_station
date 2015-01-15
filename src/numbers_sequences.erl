@@ -1,9 +1,10 @@
 -module(numbers_sequences).
 -export([get_sequence_names/0, get_term/2, n_terms/2]).
+-compile([export_all]).
 
 -spec get_sequence_names() -> list(binary()).
 get_sequence_names() ->
-    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>].
+    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>, <<"sphenic">>].
 
 -spec get_term(atom(), integer()) -> {atom(), integer()}.
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
@@ -13,6 +14,7 @@ get_term(pyramid, N) -> term(fun pyramid/1, N);
 get_term(taxicab, N) -> term(fun taxicab/1, N);
 get_term(abundant, N) -> term(fun abundant/1, N);
 get_term(padovan, N) -> term(fun padovan/1, N);
+get_term(sphenic, N) -> term(fun sphenic/1, N);
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(Fun, N) ->
@@ -61,6 +63,15 @@ abundant(N) ->
 is_abundant(K) ->
     lists:sum([D || D <- lists:seq(1, K div 2), K rem D == 0]) > K.
 
+% A number is sphenic if it is the product of three distinct primes.
+sphenic(N) ->
+    nth_term(N, fun is_sphenic/1).
+is_sphenic(K) ->
+    L = decomp(K),
+    (length(L) == 3) and (product(L) == K).
+
+
+
 % -------------------
 % Series Constructors
 
@@ -75,3 +86,20 @@ nth_term(N, Count, Candidate, Test) ->
         _ ->
             nth_term(N, Count, (Candidate + 1), Test)
     end.
+
+decomp(N) -> decomp(N, [], 2).
+decomp(N, R, I) when I * I > N ->
+    case lists:member(N, R) of
+        false -> [N|R];
+        true -> R
+    end;
+decomp(N, R, I) when (N rem I) =:= 0 ->
+    case lists:member(I, R) of
+        false -> decomp(N div I, [I|R], I);
+        true -> decomp(N div I, R, I)
+    end;
+decomp(N, R, 2) ->
+    decomp(N, R, 3);
+decomp(N, R, I) -> decomp(N, R, I+2).
+
+product(L) -> lists:foldl(fun(X,Prod) -> X * Prod end, 1, L).
