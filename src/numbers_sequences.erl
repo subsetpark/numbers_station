@@ -44,11 +44,12 @@ get_term(Pid, Sequence, K) ->
 
 tabulator(Parent_Pid, Sequence, N) -> tabulator(Parent_Pid, Sequence, N, []).
 tabulator(Parent_Pid, _, N, L) when length(L) =:= N ->
-    Parent_Pid ! {all_terms, L};
+    R = [ A || {_, A} <- lists:sort(L)],
+    Parent_Pid ! {all_terms, R};
 tabulator(Parent_Pid, Sequence, N, L) ->
     receive
         {Sequence, K, A} ->
-            tabulator(Parent_Pid, Sequence, N, [A|L])
+            tabulator(Parent_Pid, Sequence, N, [{K, A}|L])
     end.
 
 % --------------
