@@ -1,5 +1,5 @@
 -module(numbers_sequences).
--export([get_sequence_names/0, get_term/2, n_terms/2]).
+-export([get_sequence_names/0, get_term/2, n_terms/2, get_term/3, tabulator/3]).
 -compile([export_all]).
 
 -spec get_sequence_names() -> list(binary()).
@@ -25,11 +25,31 @@ term(Fun, N) ->
     end.
 
 -spec n_terms(atom(), non_neg_integer()) -> {ok, list(integer())}.
-n_terms(Sequence, N) -> n_terms(Sequence, N, []).
-n_terms(_, 0, L) -> {ok, L};
-n_terms(Sequence, N, L) ->
-    {ok, A} = get_term(Sequence, N),
-    n_terms(Sequence, N-1, [A|L]).
+n_terms(Sequence, N) ->
+    Tabulator_Pid = spawn(numbers_sequences, tabulator, [self(), Sequence, N]),
+    spawn(numbers_sequences, get_term, [Tabulator_Pid, Sequence, 1]),
+    n_terms(Tabulator_Pid, Sequence, N, 1).
+n_terms(_, _, N, K) when N == K ->
+    receive
+        {all_terms, L} ->
+            {ok, L}
+    end;
+n_terms(Tabulator_Pid, Sequence, N, K) ->
+    spawn(numbers_sequences, get_term, [Tabulator_Pid, Sequence, K+1]),
+    n_terms(Tabulator_Pid, Sequence, N, K+1).
+
+get_term(Pid, Sequence, K) ->
+    {ok, A} = get_term(Sequence, K),
+    Pid ! {Sequence, K, A}.
+
+tabulator(Parent_Pid, Sequence, N) -> tabulator(Parent_Pid, Sequence, N, []).
+tabulator(Parent_Pid, _, N, L) when length(L) =:= N ->
+    Parent_Pid ! {all_terms, L};
+tabulator(Parent_Pid, Sequence, N, L) ->
+    receive
+        {Sequence, K, A} ->
+            tabulator(Parent_Pid, Sequence, N, [A|L])
+    end.
 
 % --------------
 % Numbers Series
