@@ -19,12 +19,12 @@ init(_Route, _Req, State) ->
 terminate(_Reason, _Route, _Req, _State) ->
     ok.
 
-get("/sequence", _Req, State) ->
+get("/sequences", _Req, State) ->
     Series = numbers_sequences:get_sequence_names(),
     Json = numbers_helper:format([Series]),
     {200, {json, Json}, State};
 
-get("/sequence/:id/:n", Req, State) ->
+get("/sequences/:id/:n", Req, State) ->
     Id = binary_to_atom(leptus_req:param(Req, id), unicode),
     N = binary_to_integer(leptus_req:param(Req, n)),
 
@@ -32,15 +32,11 @@ get("/sequence/:id/:n", Req, State) ->
 
     Json = numbers_helper:format([Response]),
     
-    Code = case Status of
-        ok -> 200;
-        not_found -> 404;
-        error -> 400
-    end,
+    Code = analyze_status(Status),
 
     {Code, {json, Json}, State};
 
-get("/sequence/:id/first/:n", Req, State) ->
+get("/sequences/:id/first/:n", Req, State) ->
     Id = binary_to_atom(leptus_req:param(Req, id), unicode),
     N = binary_to_integer(leptus_req:param(Req, n)),
 
@@ -48,10 +44,13 @@ get("/sequence/:id/first/:n", Req, State) ->
 
     Json = numbers_helper:format([Response]),
     
-    Code = case Status of
+    Code = analyze_status(Status),
+
+    {Code, {json, Json}, State}.
+
+analyze_status(Status) ->
+    case Status of
         ok -> 200;
         not_found -> 404;
         error -> 400
-    end,
-
-    {Code, {json, Json}, State}.
+    end.

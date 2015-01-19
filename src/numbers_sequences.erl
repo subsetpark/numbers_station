@@ -4,7 +4,7 @@
 
 -spec get_sequence_names() -> list(binary()).
 get_sequence_names() ->
-    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>, <<"sphenic">>].
+    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>, <<"sphenic">>, <<"happy">>, <<"golomb">>, <<"recaman">>].
 
 -spec get_term(atom(), integer()) -> {atom(), integer()}.
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
@@ -15,6 +15,9 @@ get_term(taxicab, N) -> term(fun taxicab/1, N);
 get_term(abundant, N) -> term(fun abundant/1, N);
 get_term(padovan, N) -> term(fun padovan/1, N);
 get_term(sphenic, N) -> term(fun sphenic/1, N);
+get_term(happy, N) -> term(fun happy/1, N);
+get_term(golomb, N) -> term(fun golomb/1, N);
+get_term(recaman, N) -> term(fun recaman/1, N);
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(Fun, N) ->
@@ -56,6 +59,7 @@ tabulator(Parent_Pid, Sequence, N, L) ->
 % Numbers Series
 
 -define(Taxicab, [2, 1729, 87539319, 6963472309248, 48988659276962496, 24153319581254312065344]).
+-define(Phi, (1 + math:sqrt(5)) / 2).
 
 % The sequence of natural numbers - the identity sequence
 natural(N) -> N.
@@ -91,8 +95,35 @@ is_sphenic(K) ->
     L = decomp(K),
     (length(L) == 3) and (product(L) == K).
 
+% A number is happy if the repeated summing of the squares of its digits will lead to 1.
+% Otherwise it is unhappy and the process will lead to a repeated pattern starting with 4.
+happy(N) ->
+    nth_term(N, fun is_happy/1).
+is_happy(1) -> true;
+is_happy(4) -> false;
+is_happy(K) -> is_happy(sum_squares(K)).
+sum_squares(N) -> sum_squares(N, 0).
+sum_squares(0, Acc) -> round(Acc);
+sum_squares(N, Acc) -> sum_squares(N div 10, Acc + math:pow(N rem 10, 2)).
 
+golomb(1) -> 1;
+golomb(N) -> round(math:pow(?Phi, (2 - ?Phi)) * math:pow(N, (?Phi - 1))).
 
+recaman(N) -> recaman(1, N, [0]).
+recaman(Candidate, Target, L=[H|T]) ->
+    MinusN = H - Candidate,
+    A = case {lists:member(MinusN, T), MinusN > 0} of
+        {false, true} ->
+                MinusN;
+        {_, _} ->
+                H + Candidate
+    end,
+    case Candidate of
+        Target ->
+            A;
+        _ ->
+            recaman(Candidate + 1, Target, [A|L])
+    end.
 % -------------------
 % Series Constructors
 
@@ -109,6 +140,8 @@ nth_term(N, Count, Candidate, Test) ->
     end.
 
 decomp(N) -> decomp(N, [], 2).
+decomp(N, R, 2) ->
+    decomp(N, R, 3);
 decomp(N, R, I) when I * I > N ->
     case lists:member(N, R) of
         false -> [N|R];
@@ -119,8 +152,6 @@ decomp(N, R, I) when (N rem I) =:= 0 ->
         false -> decomp(N div I, [I|R], I);
         true -> decomp(N div I, R, I)
     end;
-decomp(N, R, 2) ->
-    decomp(N, R, 3);
 decomp(N, R, I) -> decomp(N, R, I+2).
 
 product(L) -> lists:foldl(fun(X,Prod) -> X * Prod end, 1, L).
