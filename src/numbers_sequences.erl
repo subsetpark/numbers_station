@@ -30,7 +30,7 @@ padovan(N, A1, A2, A3) -> padovan(N-1, A2, A3, A1+A2).
 pyramid(N) -> (N * (N + 1) * (N + 2)) div 6.
 
 
--spec taxicab(integer()) -> integer().
+-spec taxicab(integer()) -> integer() | binary().
 taxicab(N) when N =< length(?Taxicab) ->
     lists:nth(N, ?Taxicab);
 taxicab(_) -> <<"Term not known.">>.

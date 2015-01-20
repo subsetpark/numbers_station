@@ -17,26 +17,24 @@ get_sequence_names() ->
      <<"sphenic">>, <<"happy">>, <<"golomb">>, 
      <<"recaman">>, <<"susanna">>].
 
--spec get_term(atom(), integer()) -> {atom(), integer()}.
+-spec get_term(atom(), integer()) -> {atom(), (integer() | binary())}.
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
-get_term(natural, N) -> term(fun numbers_sequences:natural/1, N);
-get_term(fibonacci, N) -> term(fun numbers_sequences:fibonacci/1, N);
-get_term(pyramid, N) -> term(fun numbers_sequences:pyramid/1, N);
-get_term(taxicab, N) -> term(fun numbers_sequences:taxicab/1, N);
-get_term(abundant, N) -> term(fun numbers_sequences:abundant/1, N);
-get_term(padovan, N) -> term(fun numbers_sequences:padovan/1, N);
-get_term(sphenic, N) -> term(fun numbers_sequences:sphenic/1, N);
-get_term(happy, N) -> term(fun numbers_sequences:happy/1, N);
-get_term(golomb, N) -> term(fun numbers_sequences:golomb/1, N);
-get_term(recaman, N) -> term(fun numbers_sequences:recaman/1, N);
-get_term(susanna, N) -> term(fun numbers_sequences:susanna/1, N);
+get_term(natural, N) -> term(numbers_sequences:natural(N));
+get_term(fibonacci, N) -> term(numbers_sequences:fibonacci(N));
+get_term(pyramid, N) -> term(numbers_sequences:pyramid(N));
+get_term(taxicab, N) -> term(numbers_sequences:taxicab(N));
+get_term(abundant, N) -> term(numbers_sequences:abundant(N));
+get_term(padovan, N) -> term(numbers_sequences:padovan(N));
+get_term(sphenic, N) -> term(numbers_sequences:sphenic(N));
+get_term(happy, N) -> term(numbers_sequences:happy(N));
+get_term(golomb, N) -> term(numbers_sequences:golomb(N));
+get_term(recaman, N) -> term(numbers_sequences:recaman(N));
+get_term(susanna, N) -> term(numbers_sequences:susanna(N));
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
-term(Fun, N) ->
-    case is_integer(A=Fun(N)) of 
-        true -> {ok, A};
-        false -> {error, A}
-    end.
+term(R) when is_integer(R) -> 
+    {ok, R};
+term(R) -> {error, R}.
 
 -spec n_terms(atom(), non_neg_integer()) -> {ok, list(integer())}.
 n_terms(Sequence, N) ->
