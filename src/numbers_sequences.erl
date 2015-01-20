@@ -1,10 +1,12 @@
 -module(numbers_sequences).
--export([get_sequence_names/0, get_term/2, n_terms/2, get_term/3, tabulator/3]).
--compile([export_all]).
+-export([get_sequence_names/0, get_term/2, n_terms/2]).
 
 -spec get_sequence_names() -> list(binary()).
 get_sequence_names() ->
-    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, <<"taxicab">>, <<"abundant">>, <<"padovan">>, <<"sphenic">>, <<"happy">>, <<"golomb">>, <<"recaman">>].
+    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, 
+     <<"taxicab">>, <<"abundant">>, <<"padovan">>, 
+     <<"sphenic">>, <<"happy">>, <<"golomb">>, 
+     <<"recaman">>, <<"susanna">>].
 
 -spec get_term(atom(), integer()) -> {atom(), integer()}.
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
@@ -18,6 +20,7 @@ get_term(sphenic, N) -> term(fun sphenic/1, N);
 get_term(happy, N) -> term(fun happy/1, N);
 get_term(golomb, N) -> term(fun golomb/1, N);
 get_term(recaman, N) -> term(fun recaman/1, N);
+get_term(susanna, N) -> term(fun susanna/1, N);
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(Fun, N) ->
@@ -29,8 +32,9 @@ term(Fun, N) ->
 
 -spec n_terms(atom(), non_neg_integer()) -> {ok, list(integer())}.
 n_terms(Sequence, N) ->
-    Tabulator_Pid = spawn(numbers_sequences, tabulator, [self(), Sequence, N]),
-    spawn(numbers_sequences, get_term, [Tabulator_Pid, Sequence, 1]),
+    Parent_Pid = self(),
+    Tabulator_Pid = spawn(fun() -> tabulator(Parent_Pid, Sequence, N) end),
+    spawn(fun() -> get_term(Tabulator_Pid, Sequence, 1) end),
     n_terms(Tabulator_Pid, Sequence, N, 1).
 n_terms(_, _, N, K) when N == K ->
     receive
@@ -38,7 +42,7 @@ n_terms(_, _, N, K) when N == K ->
             {ok, L}
     end;
 n_terms(Tabulator_Pid, Sequence, N, K) ->
-    spawn(numbers_sequences, get_term, [Tabulator_Pid, Sequence, K+1]),
+    spawn(fun() -> get_term(Tabulator_Pid, Sequence, K+1) end),
     n_terms(Tabulator_Pid, Sequence, N, K+1).
 
 get_term(Pid, Sequence, K) ->
@@ -106,8 +110,10 @@ sum_squares(N) -> sum_squares(N, 0).
 sum_squares(0, Acc) -> round(Acc);
 sum_squares(N, Acc) -> sum_squares(N div 10, Acc + math:pow(N rem 10, 2)).
 
+% This one still confuses the hell out of me.
 golomb(1) -> 1;
 golomb(N) -> round(math:pow(?Phi, (2 - ?Phi)) * math:pow(N, (?Phi - 1))).
+
 
 recaman(N) -> recaman(1, N, [0]).
 recaman(Candidate, Target, L=[H|T]) ->
@@ -124,9 +130,17 @@ recaman(Candidate, Target, L=[H|T]) ->
         _ ->
             recaman(Candidate + 1, Target, [A|L])
     end.
+
+susanna(N) -> susanna(N, 0).
+susanna(N, K) -> 
+    case string:str(integer_to_list(round(math:pow(2, K))), integer_to_list(N)) of
+        0 -> susanna(N, K+1);
+        _ -> K
+    end.
 % -------------------
 % Series Constructors
 
+% Produce the nth term that satisfies a predicate
 nth_term(N, Test) ->
     nth_term(N, 0, 1, Test).
 nth_term(N, Count, Candidate, Test) ->
@@ -138,7 +152,7 @@ nth_term(N, Count, Candidate, Test) ->
         _ ->
             nth_term(N, Count, (Candidate + 1), Test)
     end.
-
+% Decompose into unique factors
 decomp(N) -> decomp(N, [], 2).
 decomp(N, R, 2) ->
     decomp(N, R, 3);
