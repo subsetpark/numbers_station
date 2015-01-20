@@ -7,8 +7,6 @@
 
 -export([get/3]).
 
--include_lib("stdlib/include/qlc.hrl").
-
 cross_domains(_Route, _Req, State) ->
     {['_'], State}.
 

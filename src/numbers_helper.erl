@@ -33,10 +33,9 @@ get_term(susanna, N) -> term(fun numbers_sequences:susanna/1, N);
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(Fun, N) ->
-    A = Fun(N),
-    if
-        is_integer(A) -> {ok, A};
-        not is_integer(A) -> {error, A}
+    case is_integer(A=Fun(N)) of 
+        true -> {ok, A};
+        false -> {error, A}
     end.
 
 -spec n_terms(atom(), non_neg_integer()) -> {ok, list(integer())}.
@@ -60,7 +59,7 @@ get_term(Pid, Sequence, K) ->
 
 tabulator(Parent_Pid, Sequence, N) -> tabulator(Parent_Pid, Sequence, N, []).
 tabulator(Parent_Pid, _, N, L) when length(L) =:= N ->
-    R = [ A || {_, A} <- lists:sort(L)],
+    R = [A || {_, A} <- lists:sort(L)],
     Parent_Pid ! {all_terms, R};
 tabulator(Parent_Pid, Sequence, N, L) ->
     receive
