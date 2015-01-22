@@ -39,8 +39,8 @@ term(R) -> {error, R}.
 -spec n_terms(atom(), non_neg_integer()) -> {ok, list(integer())}.
 n_terms(Sequence, N) ->
     Parent_Pid = self(),
-    Tabulator_Pid = spawn(fun() -> tabulator(Parent_Pid, Sequence, N) end),
-    spawn(fun() -> get_term(Tabulator_Pid, Sequence, 1) end),
+    Tabulator_Pid = spawn_link(fun() -> tabulator(Parent_Pid, Sequence, N) end),
+    spawn_link(fun() -> get_term(Tabulator_Pid, Sequence, 1) end),
     n_terms(Tabulator_Pid, Sequence, N, 1).
 n_terms(_, _, N, K) when N == K ->
     receive
@@ -48,7 +48,7 @@ n_terms(_, _, N, K) when N == K ->
             {ok, L}
     end;
 n_terms(Tabulator_Pid, Sequence, N, K) ->
-    spawn(fun() -> get_term(Tabulator_Pid, Sequence, K+1) end),
+    spawn_link(fun() -> get_term(Tabulator_Pid, Sequence, K+1) end),
     n_terms(Tabulator_Pid, Sequence, N, K+1).
 
 get_term(Pid, Sequence, K) ->
