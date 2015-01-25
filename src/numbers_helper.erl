@@ -40,25 +40,29 @@ term(R) -> {error, R}.
 n_terms(Sequence, N) ->
     Parent_Pid = self(),
     Tabulator_Pid = spawn_link(fun() -> tabulator(Parent_Pid, Sequence, N) end),
-    spawn_link(fun() -> get_term(Tabulator_Pid, Sequence, 1) end),
+    spawn_link(fun() -> get_term(Parent_Pid, Tabulator_Pid, Sequence, 1) end),
     n_terms(Tabulator_Pid, Sequence, N, 1).
+
 n_terms(_, _, N, K) when N == K ->
     receive
-        {all_terms, L} ->
-            {ok, L}
+        Result -> Result
     end;
 n_terms(Tabulator_Pid, Sequence, N, K) ->
-    spawn_link(fun() -> get_term(Tabulator_Pid, Sequence, K+1) end),
+    Parent_Pid = self(),
+    spawn_link(fun() -> get_term(Parent_Pid, Tabulator_Pid, Sequence, K+1) end),
     n_terms(Tabulator_Pid, Sequence, N, K+1).
 
-get_term(Pid, Sequence, K) ->
-    {ok, A} = get_term(Sequence, K),
-    Pid ! {Sequence, K, A}.
+get_term(Parent_Pid, Tabulator_Pid, Sequence, K) ->
+    {Status, A} = get_term(Sequence, K),
+    case Status of
+        ok -> Tabulator_Pid ! {Sequence, K, A};
+        _ -> Parent_Pid ! {Status, A}
+    end.
 
 tabulator(Parent_Pid, Sequence, N) -> tabulator(Parent_Pid, Sequence, N, []).
 tabulator(Parent_Pid, _, N, L) when length(L) =:= N ->
     R = [A || {_, A} <- lists:sort(L)],
-    Parent_Pid ! {all_terms, R};
+    Parent_Pid ! {ok, R};
 tabulator(Parent_Pid, Sequence, N, L) ->
     receive
         {Sequence, K, A} ->
