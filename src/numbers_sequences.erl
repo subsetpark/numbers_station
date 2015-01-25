@@ -1,6 +1,6 @@
 -module(numbers_sequences).
 -export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1]).
-
+-compile([export_all]).
 % --------------
 % Numbers Series
 
@@ -68,22 +68,21 @@ golomb(1) -> 1;
 golomb(N) -> round(math:pow(?Phi, (2 - ?Phi)) * math:pow(N, (?Phi - 1))).
 
 -spec recaman(integer()) -> integer().
-recaman(N) -> recaman(1, N, [0]).
-recaman(Candidate, Target, L=[H|T]) ->
-    MinusN = H - Candidate,
+recaman(N) -> recaman(N, [0]).
+recaman(N, L=[H|T]) ->
+    MinusN = H - (K=length(L)),
     A = case {lists:member(MinusN, T), MinusN > 0} of
         {false, true} ->
                 MinusN;
         {_, _} ->
-                H + Candidate
+                H + K
     end,
-    case Candidate of
-        Target ->
-            A;
-        _ ->
-            recaman(Candidate + 1, Target, [A|L])
+    case K of
+        N -> A;
+        _ -> recaman(N, [A|L])
     end.
 
+% susanna(N) = the smallest K such that 2^K contains N in its digit expansion.
 -spec susanna(integer()) -> integer().
 susanna(N) -> susanna(N, 0).
 susanna(N, K) -> 
@@ -91,6 +90,34 @@ susanna(N, K) ->
         0 -> susanna(N, K+1);
         _ -> K
     end.
+
+-spec baum_sweet(integer()) -> integer().
+baum_sweet(N) ->
+    case contains_odd_zero_blocks(N) of
+        false -> 1;
+        true -> 0
+    end.
+contains_odd_zero_blocks(N) -> contains_odd_zero_blocks(0, integer_to_list(N, 2)).
+contains_odd_zero_blocks(Count, []) -> 
+    case Count rem 2 of
+        1 -> true;
+        0 -> false
+    end;
+contains_odd_zero_blocks(Count, [H|T]) when H == $1 -> 
+    case Count rem 2 of
+        1 -> true;
+        0 -> contains_odd_zero_blocks(0, T)
+    end;
+contains_odd_zero_blocks(Count, [H|T]) when H == $0 -> 
+    contains_odd_zero_blocks(Count + 1, T).
+
+% A Harshad number is one that is divisible by the sum of its digits.
+-spec harshad(integer()) -> integer().
+harshad(N) -> nth_term(N, fun is_harshad/1).
+is_harshad(N) -> 
+    Digits = lists:map(fun erlang:list_to_integer/1, lists:map(fun(X) -> [X] end, integer_to_list(N))),
+    N rem lists:sum(Digits) =:= 0.
+
 % -------------------
 % Series Constructors
 

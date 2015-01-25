@@ -15,7 +15,8 @@ get_sequence_names() ->
     [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, 
      <<"taxicab">>, <<"abundant">>, <<"padovan">>, 
      <<"sphenic">>, <<"happy">>, <<"golomb">>, 
-     <<"recaman">>, <<"susanna">>].
+     <<"recaman">>, <<"susanna">>, <<"baum_sweet">>,
+     <<"harshad">>].
 
 -spec get_term(atom(), integer()) -> {atom(), (integer() | binary())}.
 get_term(_, N) when N < 1 -> {error, <<"Bad term.">>};
@@ -30,6 +31,8 @@ get_term(happy, N) -> term(numbers_sequences:happy(N));
 get_term(golomb, N) -> term(numbers_sequences:golomb(N));
 get_term(recaman, N) -> term(numbers_sequences:recaman(N));
 get_term(susanna, N) -> term(numbers_sequences:susanna(N));
+get_term(baum_sweet, N) -> term(numbers_sequences:baum_sweet(N));
+get_term(harshad, N) -> term(numbers_sequences:harshad(N));
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(R) when is_integer(R) -> 
