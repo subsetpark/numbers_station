@@ -1,6 +1,5 @@
 -module(numbers_sequences).
--export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1, thue_morse/1]).
--compile([export_all]).
+-export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1, thue_morse/1, kolakoski/1, baum_sweet/1, harshad/1]).
 % --------------
 % Numbers Series
 
@@ -128,6 +127,24 @@ count_zeroes(N) ->
            (_, Count) -> Count
         end,
     lists:foldl(F, 0, integer_to_list(N, 2)).
+
+% The Kolakoski sequences provides its own run-length encoding.
+-spec kolakoski(integer()) -> integer().
+kolakoski(N) -> kolakoski(N, 1, []).
+kolakoski(N, _, L) when length(L) >= N -> lists:nth(N, L);
+kolakoski(N, I, L) ->
+    Repeat = case length(L) >= I of
+        true ->
+            lists:nth(I, L);
+        false ->
+            I
+    end,
+    Value = if
+        I rem 2 == 0 -> 2;
+        true -> 1
+    end,
+    kolakoski(N, I+1, L ++ lists:duplicate(Repeat, Value)).
+
 
 % -------------------
 % Series Constructors

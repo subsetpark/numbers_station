@@ -34,6 +34,7 @@ get_term(susanna, N) -> term(numbers_sequences:susanna(N));
 get_term(baum_sweet, N) -> term(numbers_sequences:baum_sweet(N));
 get_term(harshad, N) -> term(numbers_sequences:harshad(N));
 get_term(thue_morse, N) -> term(numbers_sequences:thue_morse(N));
+get_term(kolakoski, N) -> term(numbers_sequences:kolakoski(N));
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(R) when is_integer(R) ->
