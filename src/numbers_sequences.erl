@@ -1,5 +1,5 @@
 -module(numbers_sequences).
--export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1]).
+-export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1, thue_morse/1]).
 -compile([export_all]).
 % --------------
 % Numbers Series
@@ -8,7 +8,7 @@
 -define(Phi, (1 + math:sqrt(5)) / 2).
 
 % The sequence of natural numbers - the identity sequence
--spec natural(integer()) -> integer(). 
+-spec natural(integer()) -> integer().
 natural(N) -> N.
 
 % The Fibonacci sequence - f(n) = f(n-1) + f(n-2)
@@ -85,7 +85,7 @@ recaman(N, L=[H|T]) ->
 % susanna(N) = the smallest K such that 2^K contains N in its digit expansion.
 -spec susanna(integer()) -> integer().
 susanna(N) -> susanna(N, 0).
-susanna(N, K) -> 
+susanna(N, K) ->
     case string:str(integer_to_list(round(math:pow(2, K))), integer_to_list(N)) of
         0 -> susanna(N, K+1);
         _ -> K
@@ -98,25 +98,36 @@ baum_sweet(N) ->
         true -> 0
     end.
 contains_odd_zero_blocks(N) -> contains_odd_zero_blocks(0, integer_to_list(N, 2)).
-contains_odd_zero_blocks(Count, []) -> 
+contains_odd_zero_blocks(Count, []) ->
     case Count rem 2 of
         1 -> true;
         0 -> false
     end;
-contains_odd_zero_blocks(Count, [H|T]) when H == $1 -> 
+contains_odd_zero_blocks(Count, [H|T]) when H == $1 ->
     case Count rem 2 of
         1 -> true;
         0 -> contains_odd_zero_blocks(0, T)
     end;
-contains_odd_zero_blocks(Count, [H|T]) when H == $0 -> 
+contains_odd_zero_blocks(Count, [H|T]) when H == $0 ->
     contains_odd_zero_blocks(Count + 1, T).
 
 % A Harshad number is one that is divisible by the sum of its digits.
 -spec harshad(integer()) -> integer().
 harshad(N) -> nth_term(N, fun is_harshad/1).
-is_harshad(N) -> 
+is_harshad(N) ->
     Digits = lists:map(fun erlang:list_to_integer/1, lists:map(fun(X) -> [X] end, integer_to_list(N))),
     N rem lists:sum(Digits) =:= 0.
+
+thue_morse(N) ->
+    case count_zeroes(N) rem 2 of
+        1 -> 1;
+        0 -> 0
+    end.
+count_zeroes(N) ->
+    F = fun(Chr, Count) when Chr == $0 -> Count + 1;
+           (_, Count) -> Count
+        end,
+    lists:foldl(F, 0, integer_to_list(N, 2)).
 
 % -------------------
 % Series Constructors
@@ -126,7 +137,7 @@ nth_term(N, Test) ->
     nth_term(N, 0, 1, Test).
 nth_term(N, Count, Candidate, Test) ->
     case Test(Candidate) of
-        true when Count == (N - 1) -> 
+        true when Count == (N - 1) ->
             Candidate;
         true ->
             nth_term(N, (Count + 1), (Candidate + 1), Test);

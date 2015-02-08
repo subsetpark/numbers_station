@@ -12,9 +12,9 @@ json(N) ->
 
 -spec get_sequence_names() -> list(binary()).
 get_sequence_names() ->
-    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>, 
-     <<"taxicab">>, <<"abundant">>, <<"padovan">>, 
-     <<"sphenic">>, <<"happy">>, <<"golomb">>, 
+    [<<"natural">>, <<"fibonacci">>, <<"pyramid">>,
+     <<"taxicab">>, <<"abundant">>, <<"padovan">>,
+     <<"sphenic">>, <<"happy">>, <<"golomb">>,
      <<"recaman">>, <<"susanna">>, <<"baum_sweet">>,
      <<"harshad">>].
 
@@ -33,9 +33,10 @@ get_term(recaman, N) -> term(numbers_sequences:recaman(N));
 get_term(susanna, N) -> term(numbers_sequences:susanna(N));
 get_term(baum_sweet, N) -> term(numbers_sequences:baum_sweet(N));
 get_term(harshad, N) -> term(numbers_sequences:harshad(N));
+get_term(thue_morse, N) -> term(numbers_sequences:thue_morse(N));
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
-term(R) when is_integer(R) -> 
+term(R) when is_integer(R) ->
     {ok, R};
 term(R) -> {error, R}.
 
