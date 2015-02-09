@@ -1,5 +1,5 @@
 -module(numbers_sequences).
--export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1, thue_morse/1, kolakoski/1, baum_sweet/1, harshad/1]).
+-export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1, thue_morse/1, kolakoski/1, baum_sweet/1, harshad/1, ulam/1]).
 % --------------
 % Numbers Series
 
@@ -145,6 +145,20 @@ kolakoski(N, I, L) ->
     end,
     kolakoski(N, I+1, L ++ lists:duplicate(Repeat, Value)).
 
+-spec ulam(integer()) -> integer().
+%   least number > a(n-1) which is a unique sum of two distinct earlier terms. 
+ulam(N) ->
+    ulam(N, [1]).
+ulam(N, (L=[H|_])) -> case length(L) of
+    N -> H;
+    X when X < 2 -> ulam(N, [X + 1|L]);
+    _ -> 
+        L2 = [X + Y || X <- L, Y <- L, X /= Y, not lists:member(X+Y, L)],
+        A = lists:min([A || A <- L2, 
+              length(lists:filter(fun(Y) -> Y == A end, L2)) == 2]),
+        ulam(N, [A|L])
+    end.
+    
 
 % -------------------
 % Series Constructors
