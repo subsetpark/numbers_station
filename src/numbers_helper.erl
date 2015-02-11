@@ -26,7 +26,6 @@ get_term(pyramid, N) -> term(numbers_sequences:pyramid(N));
 get_term(taxicab, N) -> term(numbers_sequences:taxicab(N));
 get_term(abundant, N) -> term(numbers_sequences:abundant(N));
 get_term(padovan, N) -> term(numbers_sequences:padovan(N));
-get_term(sphenic, N) -> term(numbers_sequences:sphenic(N));
 get_term(happy, N) -> term(numbers_sequences:happy(N));
 get_term(golomb, N) -> term(numbers_sequences:golomb(N));
 get_term(recaman, N) -> term(numbers_sequences:recaman(N));
@@ -36,6 +35,9 @@ get_term(harshad, N) -> term(numbers_sequences:harshad(N));
 get_term(thue_morse, N) -> term(numbers_sequences:thue_morse(N));
 get_term(kolakoski, N) -> term(numbers_sequences:kolakoski(N));
 get_term(ulam, N) -> term(numbers_sequences:ulam(N));
+get_term(nude, N) -> term(numbers_sequences:nude(N));
+get_term(omega, N) -> term(numbers_sequences:omega(N));
+get_term(sphenic, N) -> term(numbers_sequences:sphenic(N));
 get_term(_, _) -> {not_found, <<"Series not found.">>}.
 
 term(R) when is_integer(R) ->

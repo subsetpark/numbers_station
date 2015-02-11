@@ -1,5 +1,8 @@
 -module(numbers_sequences).
--export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, sphenic/1, happy/1, golomb/1, susanna/1, recaman/1, thue_morse/1, kolakoski/1, baum_sweet/1, harshad/1, ulam/1]).
+-export([natural/1, fibonacci/1, padovan/1, pyramid/1, taxicab/1, abundant/1, 
+         happy/1, golomb/1, susanna/1, recaman/1, thue_morse/1, kolakoski/1, 
+         baum_sweet/1, harshad/1, ulam/1, nude/1, omega/1, sphenic/1]).
+-compile([export_all]).
 % --------------
 % Numbers Series
 
@@ -41,13 +44,9 @@ abundant(N) ->
 is_abundant(K) ->
     lists:sum([D || D <- lists:seq(1, K div 2), K rem D == 0]) > K.
 
-% A number is sphenic if it is the product of three distinct primes.
--spec sphenic(integer()) -> integer().
-sphenic(N) ->
-    nth_term(N, fun is_sphenic/1).
-is_sphenic(K) ->
-    L = decomp(K),
-    (length(L) == 3) and (product(L) == K).
+-spec omega(integer()) -> integer().
+omega(N) ->
+    length(prime_factor(N)).
 
 % A number is happy if the repeated summing of the squares of its digits will lead to 1.
 % Otherwise it is unhappy and the process will lead to a repeated pattern starting with 4.
@@ -114,8 +113,7 @@ contains_odd_zero_blocks(Count, [H|T]) when H == $0 ->
 -spec harshad(integer()) -> integer().
 harshad(N) -> nth_term(N, fun is_harshad/1).
 is_harshad(N) ->
-    Digits = lists:map(fun erlang:list_to_integer/1, lists:map(fun(X) -> [X] end, integer_to_list(N))),
-    N rem lists:sum(Digits) =:= 0.
+    N rem lists:sum(get_digits(N)) =:= 0.
 
 thue_morse(N) ->
     case count_zeroes(N) rem 2 of
@@ -159,7 +157,20 @@ ulam(N, (L=[H|_])) -> case length(L) of
         ulam(N, [A|L])
     end.
     
+-spec nude(integer()) -> integer().
+% A number is nude if it is divisible by each of its digits.
+nude(N) ->
+    nth_term(N, fun is_nude/1).
+is_nude(K) ->
+    lists:all(fun(D) -> (D /= 0) andalso (K rem D == 0) end, get_digits(K)).
 
+-spec sphenic(integer()) -> integer().
+% A sphenic number is the product of exactly three primes.
+sphenic(N) ->
+    nth_term(N, fun is_sphenic/1).
+is_sphenic(K) ->
+    Factors = prime_factor(K),
+    (length(Factors) == 3) and (product(Factors) == K).
 % -------------------
 % Series Constructors
 
@@ -175,20 +186,36 @@ nth_term(N, Count, Candidate, Test) ->
         _ ->
             nth_term(N, Count, (Candidate + 1), Test)
     end.
-% Decompose into unique factors
-decomp(N) -> decomp(N, [], 2).
-decomp(N, R, 2) ->
-    decomp(N, R, 3);
-decomp(N, R, I) when I * I > N ->
-    case lists:member(N, R) of
-        false -> [N|R];
-        true -> R
-    end;
-decomp(N, R, I) when (N rem I) =:= 0 ->
-    case lists:member(I, R) of
-        false -> decomp(N div I, [I|R], I);
-        true -> decomp(N div I, R, I)
-    end;
-decomp(N, R, I) -> decomp(N, R, I+2).
 
-product(L) -> lists:foldl(fun(X,Prod) -> X * Prod end, 1, L).
+prime_factor(N) ->
+    Parent = self(),
+    Pid = spawn_link(fun() -> prime_factor1(N, [], Parent) end),
+    spawn_link(fun() -> sieve(lists:seq(2, N), Pid) end),
+    receive
+        {factors, Factors} ->
+            Factors
+    end.
+prime_factor1(N, Factors, Parent) ->
+    receive
+        {factor, Factor} ->
+            case N rem Factor of
+                0 ->
+                    prime_factor1(N, [Factor|Factors], Parent);
+                _ ->
+                    prime_factor1(N, Factors, Parent)
+            end;
+        {done} ->
+            Parent ! {factors, Factors}
+    end.
+sieve([K|Ks], Parent) ->
+    Parent ! {factor, K},
+    % Build the sieve and peel off a new prime one by one
+    sieve([X || X <- Ks, X rem K /= 0], Parent);
+sieve([], Parent) ->
+    Parent ! {done}.
+
+product(L) -> 
+    lists:foldl(fun(X,Prod) -> X * Prod end, 1, L).
+
+get_digits(N) -> 
+    lists:map(fun erlang:list_to_integer/1, lists:map(fun(X) -> [X] end, integer_to_list(N))).
