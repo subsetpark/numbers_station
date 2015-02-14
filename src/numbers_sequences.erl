@@ -204,7 +204,7 @@ prime_factor1(N, Factors, Parent) ->
                 _ ->
                     prime_factor1(N, Factors, Parent)
             end;
-        {done} ->
+        done ->
             Parent ! {factors, Factors}
     end.
 sieve([K|Ks], Parent) ->
@@ -212,7 +212,7 @@ sieve([K|Ks], Parent) ->
     % Build the sieve and peel off a new prime one by one
     sieve([X || X <- Ks, X rem K /= 0], Parent);
 sieve([], Parent) ->
-    Parent ! {done}.
+    Parent ! done.
 
 product(L) -> 
     lists:foldl(fun(X,Prod) -> X * Prod end, 1, L).
